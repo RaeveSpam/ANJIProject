@@ -1,0 +1,16 @@
+<chromosome id="5314" primary-parent-id="2474"><neuron id="0" type="in" activation="linear"/>
+<neuron id="1" type="in" activation="linear"/>
+<neuron id="2" type="in" activation="linear"/>
+<neuron id="3" type="out" activation="sigmoid"/>
+<connection id="5" src-id="1" dest-id="3" weight="-1.2431728697943192"/>
+<neuron id="289" type="hid" activation="sigmoid"/>
+<neuron id="412" type="hid" activation="sigmoid"/>
+<connection id="413" src-id="2" dest-id="412" weight="-2.2025262687092506"/>
+<connection id="414" src-id="412" dest-id="3" weight="-1.8681552949145306"/>
+<neuron id="544" type="hid" activation="sigmoid"/>
+<connection id="545" src-id="0" dest-id="544" weight="-0.503322234997501"/>
+<connection id="546" src-id="544" dest-id="289" weight="-2.563633000904149"/>
+<neuron id="672" type="hid" activation="sigmoid"/>
+<connection id="673" src-id="289" dest-id="672" weight="0.5380130643189567"/>
+<connection id="674" src-id="672" dest-id="3" weight="-4.777076299509751"/>
+</chromosome>

@@ -1,0 +1,19 @@
+<chromosome id="5205" primary-parent-id="3948"><neuron id="0" type="in" activation="linear"/>
+<neuron id="1" type="in" activation="linear"/>
+<neuron id="2" type="in" activation="linear"/>
+<neuron id="3" type="out" activation="sigmoid"/>
+<connection id="4" src-id="0" dest-id="3" weight="1.3775119928002717"/>
+<connection id="5" src-id="1" dest-id="3" weight="3.9260366561509596"/>
+<neuron id="289" type="hid" activation="sigmoid"/>
+<connection id="291" src-id="289" dest-id="3" weight="10.766807266481964"/>
+<neuron id="412" type="hid" activation="sigmoid"/>
+<connection id="413" src-id="2" dest-id="412" weight="2.84712626699474"/>
+<connection id="414" src-id="412" dest-id="3" weight="-2.080332027182161"/>
+<neuron id="544" type="hid" activation="sigmoid"/>
+<connection id="546" src-id="544" dest-id="289" weight="-11.409038845279902"/>
+<neuron id="675" type="hid" activation="sigmoid"/>
+<connection id="676" src-id="0" dest-id="675" weight="-4.112535724732146"/>
+<neuron id="803" type="hid" activation="sigmoid"/>
+<connection id="804" src-id="675" dest-id="803" weight="-0.6077934511064234"/>
+<connection id="805" src-id="803" dest-id="544" weight="2.490986766368878"/>
+</chromosome>

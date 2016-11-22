@@ -1,0 +1,10 @@
+<chromosome id="5201" primary-parent-id="2532"><neuron id="0" type="in" activation="linear"/>
+<neuron id="1" type="in" activation="linear"/>
+<neuron id="2" type="in" activation="linear"/>
+<neuron id="3" type="out" activation="sigmoid"/>
+<connection id="5" src-id="1" dest-id="3" weight="2.431186422231582"/>
+<connection id="6" src-id="2" dest-id="3" weight="0.33231720395134645"/>
+<neuron id="289" type="hid" activation="sigmoid"/>
+<connection id="290" src-id="0" dest-id="289" weight="4.218757410539259"/>
+<connection id="291" src-id="289" dest-id="3" weight="2.4149236439814254"/>
+</chromosome>

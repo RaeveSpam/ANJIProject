@@ -1,0 +1,13 @@
+<chromosome id="5400" primary-parent-id="3813"><neuron id="0" type="in" activation="linear"/>
+<neuron id="1" type="in" activation="linear"/>
+<neuron id="2" type="in" activation="linear"/>
+<neuron id="3" type="out" activation="sigmoid"/>
+<connection id="4" src-id="0" dest-id="3" weight="2.5440673729917247"/>
+<connection id="5" src-id="1" dest-id="3" weight="-2.1733134532948357"/>
+<connection id="6" src-id="2" dest-id="3" weight="2.257567371454826"/>
+<neuron id="412" type="hid" activation="sigmoid"/>
+<connection id="413" src-id="2" dest-id="412" weight="0.6429970843943353"/>
+<neuron id="1062" type="hid" activation="sigmoid"/>
+<connection id="1063" src-id="412" dest-id="1062" weight="1.0554284290967269"/>
+<connection id="1064" src-id="1062" dest-id="3" weight="1.193376000327726"/>
+</chromosome>

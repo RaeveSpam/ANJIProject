@@ -1,0 +1,15 @@
+<chromosome id="5408" primary-parent-id="4300"><neuron id="0" type="in" activation="linear"/>
+<neuron id="1" type="in" activation="linear"/>
+<neuron id="2" type="in" activation="linear"/>
+<neuron id="3" type="out" activation="sigmoid"/>
+<connection id="4" src-id="0" dest-id="3" weight="-2.119939313999836"/>
+<connection id="5" src-id="1" dest-id="3" weight="1.6421289355296458"/>
+<connection id="6" src-id="2" dest-id="3" weight="-3.777095630193519"/>
+<neuron id="412" type="hid" activation="sigmoid"/>
+<connection id="413" src-id="2" dest-id="412" weight="1.0455677062670137"/>
+<connection id="414" src-id="412" dest-id="3" weight="0.09775471727168661"/>
+<connection id="538" src-id="0" dest-id="412" weight="2.4334391912433846"/>
+<neuron id="1322" type="hid" activation="sigmoid"/>
+<connection id="1323" src-id="1" dest-id="1322" weight="0.9925414610903309"/>
+<connection id="1324" src-id="1322" dest-id="3" weight="3.9819839207135588"/>
+</chromosome>

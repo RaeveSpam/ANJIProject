@@ -1,0 +1,11 @@
+<chromosome id="5266" primary-parent-id="1035"><neuron id="0" type="in" activation="linear"/>
+<neuron id="1" type="in" activation="linear"/>
+<neuron id="2" type="in" activation="linear"/>
+<neuron id="3" type="out" activation="sigmoid"/>
+<connection id="4" src-id="0" dest-id="3" weight="-1.2698232728782817"/>
+<connection id="5" src-id="1" dest-id="3" weight="-1.4260843335211164"/>
+<connection id="6" src-id="2" dest-id="3" weight="0.418903112411499"/>
+<neuron id="412" type="hid" activation="sigmoid"/>
+<connection id="413" src-id="2" dest-id="412" weight="-0.7951782398276368"/>
+<connection id="414" src-id="412" dest-id="3" weight="2.3060242534831903"/>
+</chromosome>

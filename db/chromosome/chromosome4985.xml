@@ -1,0 +1,17 @@
+<chromosome id="4985" primary-parent-id="4074"><neuron id="0" type="in" activation="linear"/>
+<neuron id="1" type="in" activation="linear"/>
+<neuron id="2" type="in" activation="linear"/>
+<neuron id="3" type="out" activation="sigmoid"/>
+<connection id="6" src-id="2" dest-id="3" weight="2.034607091578046"/>
+<neuron id="289" type="hid" activation="sigmoid"/>
+<connection id="290" src-id="0" dest-id="289" weight="2.0369171519408686"/>
+<connection id="291" src-id="289" dest-id="3" weight="-1.7128489933261841"/>
+<neuron id="412" type="hid" activation="sigmoid"/>
+<connection id="413" src-id="2" dest-id="412" weight="-1.0107219964069785"/>
+<connection id="414" src-id="412" dest-id="3" weight="-2.7072591122273613"/>
+<connection id="537" src-id="2" dest-id="289" weight="4.842313210520407"/>
+<neuron id="1322" type="hid" activation="sigmoid"/>
+<connection id="1323" src-id="1" dest-id="1322" weight="-1.76485745951772"/>
+<connection id="1324" src-id="1322" dest-id="3" weight="-5.245330323451878"/>
+<connection id="3028" src-id="0" dest-id="1322" weight="-2.3990595931402234"/>
+</chromosome>

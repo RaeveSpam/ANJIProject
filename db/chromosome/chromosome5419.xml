@@ -1,0 +1,15 @@
+<chromosome id="5419" primary-parent-id="4733"><neuron id="0" type="in" activation="linear"/>
+<neuron id="1" type="in" activation="linear"/>
+<neuron id="2" type="in" activation="linear"/>
+<neuron id="3" type="out" activation="sigmoid"/>
+<connection id="5" src-id="1" dest-id="3" weight="0.821258996341654"/>
+<connection id="6" src-id="2" dest-id="3" weight="-0.0089935041899033"/>
+<neuron id="289" type="hid" activation="sigmoid"/>
+<connection id="291" src-id="289" dest-id="3" weight="-0.6069053803128912"/>
+<neuron id="412" type="hid" activation="sigmoid"/>
+<connection id="413" src-id="2" dest-id="412" weight="-2.5148439885615295"/>
+<connection id="414" src-id="412" dest-id="3" weight="-9.538071030390133"/>
+<neuron id="544" type="hid" activation="sigmoid"/>
+<connection id="545" src-id="0" dest-id="544" weight="-0.8364850558902563"/>
+<connection id="546" src-id="544" dest-id="289" weight="-9.587675117124025"/>
+</chromosome>

@@ -1,0 +1,27 @@
+<chromosome id="5325" primary-parent-id="4938"><neuron id="0" type="in" activation="linear"/>
+<neuron id="1" type="in" activation="linear"/>
+<neuron id="2" type="in" activation="linear"/>
+<neuron id="3" type="out" activation="sigmoid"/>
+<connection id="4" src-id="0" dest-id="3" weight="0.6502939862326689"/>
+<connection id="5" src-id="1" dest-id="3" weight="-2.0910859415861838"/>
+<neuron id="289" type="hid" activation="sigmoid"/>
+<connection id="291" src-id="289" dest-id="3" weight="5.787970768122438"/>
+<neuron id="412" type="hid" activation="sigmoid"/>
+<connection id="413" src-id="2" dest-id="412" weight="3.923556453355082"/>
+<connection id="414" src-id="412" dest-id="3" weight="-6.500862793881584"/>
+<neuron id="544" type="hid" activation="sigmoid"/>
+<connection id="546" src-id="544" dest-id="289" weight="-3.417334034134243"/>
+<neuron id="675" type="hid" activation="sigmoid"/>
+<connection id="676" src-id="0" dest-id="675" weight="-5.0394195540318725"/>
+<connection id="802" src-id="412" dest-id="289" weight="5.812234077648243"/>
+<neuron id="803" type="hid" activation="sigmoid"/>
+<connection id="805" src-id="803" dest-id="544" weight="-2.1767355457783077"/>
+<connection id="1451" src-id="803" dest-id="412" weight="2.14759692974692"/>
+<neuron id="1453" type="hid" activation="sigmoid"/>
+<connection id="1455" src-id="1453" dest-id="803" weight="-6.264220357369629"/>
+<neuron id="1730" type="hid" activation="sigmoid"/>
+<connection id="1731" src-id="675" dest-id="1730" weight="1.7899084434382637"/>
+<connection id="1732" src-id="1730" dest-id="1453" weight="-2.0266463525302054"/>
+<connection id="1989" src-id="544" dest-id="412" weight="1.7659800834154966"/>
+<connection id="2123" src-id="1730" dest-id="3" weight="0.37733592118474407"/>
+</chromosome>
