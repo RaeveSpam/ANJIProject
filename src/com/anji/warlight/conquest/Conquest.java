@@ -120,8 +120,8 @@ public class Conquest {
 				config.engine.maxGameRounds = 100; //Integer.parseInt(args[0]);
 				config.engine.botCommandTimeoutMillis = 5000; //Long.parseLong(args[1]);
 				
-				config.bot1Init = "internal:conquest.bot.FatBot"; //args[2];
-				config.bot2Init = "process:java -cp bin conquest.bot.BotStarter";
+				config.bot1Init = "internal:com.anji.warlight.conquest.bot.BotStarter"; //args[2];
+				config.bot2Init = "process:java -cp bin com.anji.warlight.conquest.bot.BotStarter";
 				
 				config.visualize = true;// Boolean.parseBoolean(args[4]);
 				
