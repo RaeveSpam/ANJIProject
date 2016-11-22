@@ -1,7 +1,12 @@
 .metadata
 bin/
 tmp/
-db/
+db
+db/*
+db/chromosome/*
+db/chromosome
+db/chromosome/
+
 *.tmp
 *.bak
 *.swp
