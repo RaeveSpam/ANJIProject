@@ -20,8 +20,10 @@ package com.anji.warlight.conquest.bot;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import com.anji.warlight.conquest.game.GameMap;
 import com.anji.warlight.conquest.game.RegionData;
 import com.anji.warlight.conquest.game.move.AttackTransferMove;
+import com.anji.warlight.conquest.game.move.Move;
 import com.anji.warlight.conquest.game.move.PlaceArmiesMove;
 import com.anji.warlight.conquest.view.GUI;
 
@@ -129,8 +131,146 @@ public class FatBot implements Bot
 		return attackTransferMoves;
 	}
 
+	public float[] createWeightedPotentialState(BotState state, Move move){
+		GameMap map = state.getFullMap().getMapCopy();
+		
+		if(move.getClass() == PlaceArmiesMove.class){			//Place armies move
+			PlaceArmiesMove place = (PlaceArmiesMove)move;
+			RegionData r = map.getRegion(place.getRegion().getId());
+			r.setArmies(place.getArmies()+r.getArmies());		//add armies to region
+		} else if(move.getClass() == AttackTransferMove.class){
+			AttackTransferMove att = (AttackTransferMove)move;
+			RegionData from = map.getRegion(att.getFromRegion().getId());
+			RegionData to = map.getRegion(att.getToRegion().getId());
+			if(att.getToRegion().ownedByPlayer(state.getMyPlayerName())){
+				//transfer move
+				from.setArmies(from.getArmies()-att.getArmies());		//remove armies from FromRegion
+				to.setArmies(to.getArmies()+att.getArmies());			//add armies to ToRegion
+			} else {
+				//Attack move
+				int[] combatResult = getAverageOutcome(att.getToRegion().getArmies(), att.getArmies());
+				if(combatResult[1]==0){	
+					//Defenders lost
+					to.setArmies(-combatResult[0]);						//add surviving attackers to defending region
+					from.setArmies(from.getArmies()-att.getArmies());	//remove attack armies from origin
+				} else if(combatResult[0]>0){
+					//Defenders won
+					to.setArmies(combatResult[1]);						//Set surviving defenders
+					from.setArmies(from.getArmies()-att.getArmies()+combatResult[0]);	//Return potential survivors
+				}
+			}
+		}	
+		// DO SOME MAGIC 
+		// Apply value for each region dependent on strengths, threats
+		LinkedList<RegionData> full = map.getRegions();
+		LinkedList<RegionData> visible = map.getRegions();
+		
+		float[] result = new float[full.size()];
+		
+		//Value is equal to army strength. Positive when owned, negative when enemy or neutral. Same as method below.
+		for(RegionData r : map.getRegions()){
+			if(visible.contains(r)){
+				//CALCULATE STRENGTH
+				//Sum nearbours.armies+this.armies
+				
+				if(r.ownedByPlayer(state.getMyPlayerName())){
+					result[r.getId()] = r.getArmies();			//Owned region
+					
+					
+				} else {
+					result[r.getId()] = -1.0f * r.getArmies(); 	//Enemy or neutral region
+				}
+			} else {
+				result[r.getId()] = -2.0f;						//Unknown territory, assumed neutral
+			}
+		}
+		return result;
+	}
+	
+	public float[] createPotentialState(BotState state, Move move){		
+		LinkedList<RegionData> full = state.getFullMap().getRegions();
+		LinkedList<RegionData> visible = state.getMap().getRegions();
+		
+		float[] result = new float[full.size()];
+		
+		for(RegionData r : state.getFullMap().getRegions()){
+			if(visible.contains(r)){
+				if(r.ownedByPlayer(state.getMyPlayerName())){
+					result[r.getId()] = r.getArmies();			//Owned region
+				} else {
+					result[r.getId()] = -1.0f * r.getArmies(); 	//Enemy or neutral region
+				}
+			} else {
+				result[r.getId()] = -2.0f;						//Unknown territory, assumed neutral
+			}
+		}
+		
+		if(move.getClass() == PlaceArmiesMove.class){			//Place armies move
+			PlaceArmiesMove place = (PlaceArmiesMove)move;
+			result[place.getRegion().getId()] += place.getArmies();	//add armies to region
+		} else if(move.getClass() == AttackTransferMove.class){
+			AttackTransferMove att = (AttackTransferMove)move;
+			if(att.getToRegion().ownedByPlayer(state.getMyPlayerName())){
+				//transfer move
+				result[att.getFromRegion().getId()] -= att.getArmies();	//remove armies from FromRegion
+				result[att.getToRegion().getId()] += att.getArmies();		//add armies to ToRegion
+			} else {
+				//Attack move
+				int[] combatResult = getAverageOutcome(att.getToRegion().getArmies(), att.getArmies());
+				if(combatResult[1]==0){	
+					//Defenders lost
+					result[att.getToRegion().getId()] = combatResult[0];		//add surviving attackers to defending region
+					result[att.getFromRegion().getId()] -= att.getArmies();		//remove attack armies from origin
+				} else if(combatResult[0]>0){
+					//Defenders won
+					result[att.getToRegion().getId()] = -1.0f*combatResult[1]; 	//Set surviving defenders
+					result[att.getFromRegion().getId()] -= att.getArmies(); 	//remove armies that went to attack
+					result[att.getFromRegion().getId()] += combatResult[0];		//add retreating survivors
+				}
+			}
+		}	
+		return result;
+	}
+	
 	@Override
 	public void setGUI(GUI gui) {
+	}
+	
+	/**
+	 * @param defenders
+	 * @param attackers
+	 * @return size 2 array. [0] surviving attacker, [1] surviving defenders.
+	 */
+	private int[] getAverageOutcome(int defenders, int attackers){
+		boolean original=true;
+		int[] result = new int[2];
+		int dd;
+		int da;
+		if(original){			
+			//Original attack
+			dd = Math.round(attackers*0.6f);
+			da = Math.round(defenders*0.7f);
+		} else {
+			//Continual attack
+			float turnsToKill = (defenders/0.6f);
+			float otherTTK = (attackers/0.7f);
+			if(otherTTK < turnsToKill){
+				turnsToKill = otherTTK;						//how many turns will it take
+			}
+			dd = Math.round(turnsToKill*0.6f);
+			da = Math.round(turnsToKill*0.7f);
+		}
+		if(da >= attackers){
+			da = attackers;
+			if(dd >= defenders){
+				dd = defenders-1;
+			}
+		} else if(dd >= defenders){
+			dd = defenders;
+		}
+		result[0] = attackers-da;
+		result[1] = defenders-dd;
+		return result;
 	}
 	
 	public static void main(String[] args)
