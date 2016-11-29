@@ -20,6 +20,8 @@ package com.anji.warlight.conquest.bot;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import org.jgap.Genotype;
+
 import com.anji.warlight.conquest.game.GameMap;
 import com.anji.warlight.conquest.game.RegionData;
 import com.anji.warlight.conquest.game.move.AttackTransferMove;
@@ -28,8 +30,16 @@ import com.anji.warlight.conquest.game.move.PlaceArmiesMove;
 import com.anji.warlight.conquest.view.GUI;
 
 
-public class FatBot implements Bot 
-{
+public class NEATWarlightBot implements Bot 
+{	
+	public NEATWarlightBot(Genotype genome){
+		// init netværk from genome
+	}
+	
+	public NEATWarlightBot(){
+		super();
+	}
+	
 	/**
 	 * A method used at the start of the game to decide which player start with what Regions. 6 Regions are required to be returned.
 	 * This example randomly picks 6 regions from the pickable starting Regions given by the engine.
@@ -98,6 +108,8 @@ public class FatBot implements Bot
 		ArrayList<AttackTransferMove> attackTransferMoves = new ArrayList<AttackTransferMove>();
 		String myName = state.getMyPlayerName();
 		int armies = 5;
+		GameMap expMap = state.getFullMap().getMapCopy();
+		
 		
 		for(RegionData fromRegion : state.getMap().getRegions())
 		{
@@ -108,6 +120,17 @@ public class FatBot implements Bot
 				
 				while(!possibleToRegions.isEmpty())
 				{
+					// ----- Incredible Stuff -----
+					GameMap plannedMap = state.getFullMap().getMapCopy();
+					float plannedMapScore = 0.0f; // = NEAT.getOutput();
+					// generate move fra realMap
+					
+					// eval move
+					// 		potentialMap = plannedMap <- move
+					//		if(potentialMap > plannedMap) NETWORK
+					//			moves.add(move)
+					//			plannedMap = potentialMap
+					
 					double rand = Math.random();
 					int r = (int) (rand*possibleToRegions.size());
 					RegionData toRegion = possibleToRegions.get(r);
@@ -131,8 +154,66 @@ public class FatBot implements Bot
 		return attackTransferMoves;
 	}
 
+	/**
+	 * Get a float[] representation of the given map based on the player's visible map.
+	 * @param fullMap
+	 * @param visibleMap
+	 * @param playerName
+	 * @return
+	 */
+	public float[] getFloatArrayMap(GameMap fullMap, GameMap visibleMap, String playerName){
+		LinkedList<RegionData> full = fullMap.getRegions();
+		LinkedList<RegionData> visible = visibleMap.getRegions();
+		float[] result = new float[full.size()];
+		//Value is equal to army strength. Positive when owned, negative when enemy or neutral. Same as method below.
+		for(RegionData r : full){
+			if(visible.contains(r)){
+				if(r.ownedByPlayer(playerName)){
+					result[r.getId()] = r.getArmies();			//Owned region
+				} else {
+					result[r.getId()] = -1.0f * r.getArmies(); 	//Enemy or neutral region
+				}
+			} else {
+				result[r.getId()] = -2.0f;						//Unknown territory, assumed neutral
+			}
+		}
+		return result;	
+	}
+	
+	public GameMap createPotentialMap(BotState state, Move move){
+		GameMap map = state.getFullMap().getMapCopy();
+		if(move.getClass() == PlaceArmiesMove.class){			//Place armies move
+			PlaceArmiesMove place = (PlaceArmiesMove)move;
+			RegionData r = map.getRegion(place.getRegion().getId());
+			r.setArmies(place.getArmies()+r.getArmies());		//add armies to region
+		} else if(move.getClass() == AttackTransferMove.class){
+			AttackTransferMove att = (AttackTransferMove)move;
+			RegionData from = map.getRegion(att.getFromRegion().getId());
+			RegionData to = map.getRegion(att.getToRegion().getId());
+			if(att.getToRegion().ownedByPlayer(state.getMyPlayerName())){
+				//transfer move
+				from.setArmies(from.getArmies()-att.getArmies());		//remove armies from FromRegion
+				to.setArmies(to.getArmies()+att.getArmies());			//add armies to ToRegion
+			} else {
+				//Attack move
+				int[] combatResult = getAverageOutcome(att.getToRegion().getArmies(), att.getArmies());
+				if(combatResult[1]==0){	
+					//Defenders lost
+					to.setArmies(-combatResult[0]);						//add surviving attackers to defending region
+					from.setArmies(from.getArmies()-att.getArmies());	//remove attack armies from origin
+				} else if(combatResult[0]>0){
+					//Defenders won
+					to.setArmies(combatResult[1]);						//Set surviving defenders
+					from.setArmies(from.getArmies()-att.getArmies()+combatResult[0]);	//Return potential survivors
+				}
+			}
+		}
+		return map;
+	}
+	
 	public float[] createWeightedPotentialState(BotState state, Move move){
 		GameMap map = state.getFullMap().getMapCopy();
+		
 		
 		if(move.getClass() == PlaceArmiesMove.class){			//Place armies move
 			PlaceArmiesMove place = (PlaceArmiesMove)move;
@@ -160,6 +241,7 @@ public class FatBot implements Bot
 				}
 			}
 		}	
+
 		// DO SOME MAGIC 
 		// Apply value for each region dependent on strengths, threats
 		LinkedList<RegionData> full = map.getRegions();
@@ -276,7 +358,7 @@ public class FatBot implements Bot
 	public static void main(String[] args)
 	{
 
-		BotParser parser = new BotParser(new FatBot());
+		BotParser parser = new BotParser(new NEATWarlightBot());
 		//parser.setLogFile(new File("./BotStarter.log"));
 		parser.run();
 	}
