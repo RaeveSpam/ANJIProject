@@ -123,8 +123,7 @@ public class NEATWarlightBot implements Bot
 					// ----- Incredible Stuff -----
 					GameMap plannedMap = state.getFullMap().getMapCopy();
 					float plannedMapScore = 0.0f; // = NEAT.getOutput();
-					// generate move fra realMap
-					
+					// generate move frOM realMap
 					// eval move
 					// 		potentialMap = plannedMap <- move
 					//		if(potentialMap > plannedMap) NETWORK
