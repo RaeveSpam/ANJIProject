@@ -32,12 +32,16 @@ import com.anji.warlight.conquest.view.GUI;
 
 public class NEATWarlightBot implements Bot 
 {	
+	public float Score;
+	
 	public NEATWarlightBot(Genotype genome){
 		// init netværk from genome
+		Score = 0.0f;
 	}
 	
 	public NEATWarlightBot(){
 		super();
+		Score = 0.0f;
 	}
 	
 	/**
@@ -48,6 +52,7 @@ public class NEATWarlightBot implements Bot
 	@Override
 	public ArrayList<RegionData> getPreferredStartingRegions(BotState state, Long timeOut)
 	{
+		//Score = neat.getOutput(state.getFullMap.getMapCopy);
 		int m = 6;
 		ArrayList<RegionData> preferredStartingRegions = new ArrayList<RegionData>();
 		for(int i=0; i<m; i++)
@@ -74,26 +79,43 @@ public class NEATWarlightBot implements Bot
 	@Override
 	public ArrayList<PlaceArmiesMove> getPlaceArmiesMoves(BotState state, Long timeOut) 
 	{
-		
+		//Score = neat.getOutput(state.getFullMap.getMapCopy);
 		ArrayList<PlaceArmiesMove> placeArmiesMoves = new ArrayList<PlaceArmiesMove>();
 		String myName = state.getMyPlayerName();
-		int armies = 2;
+		int armies = 1;
 		int armiesLeft = state.getStartingArmies();
 		LinkedList<RegionData> visibleRegions = state.getMap().getRegions();
 		
+		GameMap plannedMap = state.getFullMap().getMapCopy();
+		float plannedScore = 0.0f; //neat.getOutput(plannedMap)
+		
 		while(armiesLeft > 0)
 		{
-			double rand = Math.random();
-			int r = (int) (rand*visibleRegions.size());
-			RegionData region = visibleRegions.get(r);
+			float bestScore = 0.0f;
+			PlaceArmiesMove bestMove = null;
+			GameMap bestMap = null;
 			
-			if(region.ownedByPlayer(myName))
-			{
-				placeArmiesMoves.add(new PlaceArmiesMove(myName, region, Math.min(armiesLeft, armies)));
+			for(RegionData toRegion : visibleRegions){
+				if(toRegion.ownedByPlayer(myName)){
+					//create potential move
+					PlaceArmiesMove potMove = new PlaceArmiesMove(myName, toRegion, Math.min(armiesLeft, armies));
+					//evaluate move
+					GameMap potMap = createPotentialMap(plannedMap, potMove, myName);
+					float potScore = 0.0f; //neat.getoutput(potmap);
+					if(potScore > bestScore){
+						bestMove = potMove;
+						bestScore = potScore;
+						bestMap = potMap;
+					}
+				}
+			}
+			if(!bestMove.equals(null)){
+				plannedMap = bestMap;
+				plannedScore = bestScore;
+				placeArmiesMoves.add(bestMove);
 				armiesLeft -= armies;
 			}
 		}
-		
 		return placeArmiesMoves;
 	}
 
@@ -105,48 +127,47 @@ public class NEATWarlightBot implements Bot
 	@Override
 	public ArrayList<AttackTransferMove> getAttackTransferMoves(BotState state, Long timeOut) 
 	{
+		//Score = neat.getOutput(state.getFullMap.getMapCopy);
 		ArrayList<AttackTransferMove> attackTransferMoves = new ArrayList<AttackTransferMove>();
 		String myName = state.getMyPlayerName();
 		int armies = 5;
-		GameMap expMap = state.getFullMap().getMapCopy();
-		
+		GameMap plannedMap = state.getFullMap().getMapCopy();
+		float plannedMapScore = 0.0f; // = NEAT.getOutput(plannelMap);
 		
 		for(RegionData fromRegion : state.getMap().getRegions())
 		{
 			if(fromRegion.ownedByPlayer(myName)) //do an attack
 			{
 				ArrayList<RegionData> possibleToRegions = new ArrayList<RegionData>();
-				possibleToRegions.addAll(fromRegion.getNeighbors());
+				possibleToRegions.addAll(fromRegion.getNeighbors());	
 				
-				while(!possibleToRegions.isEmpty())
-				{
-					// ----- Incredible Stuff -----
-					GameMap plannedMap = state.getFullMap().getMapCopy();
-					float plannedMapScore = 0.0f; // = NEAT.getOutput();
-					// generate move frOM realMap
-					// eval move
-					// 		potentialMap = plannedMap <- move
-					//		if(potentialMap > plannedMap) NETWORK
-					//			moves.add(move)
-					//			plannedMap = potentialMap
+				// ----- Incredible Stuff -----
+				AttackTransferMove bestMove = null;
+				float bestMoveScore = plannedMapScore;
+				GameMap bestPotMap = plannedMap;
+				
+				// generate move from realMap
+				for(RegionData toRegion : possibleToRegions){
+
+					// generate move from realMap
+					armies = fromRegion.getArmies()-1;
+					AttackTransferMove potMove = new AttackTransferMove(myName, fromRegion, toRegion, armies);
+					GameMap potMap = createPotentialMap(state, potMove);
 					
-					double rand = Math.random();
-					int r = (int) (rand*possibleToRegions.size());
-					RegionData toRegion = possibleToRegions.get(r);
-					
-					if(!toRegion.getPlayerName().equals(myName) && fromRegion.getArmies() > 6) //do an attack
+					// evaluate move
+					float potScore = 0.0f; //NEAT.getOutPut(potMap)
+					if(potScore > bestMoveScore)
 					{
-						attackTransferMoves.add(new AttackTransferMove(myName, fromRegion, toRegion, armies));
-						break;
+						bestMove = potMove;
+						bestMoveScore = potScore;
 					}
-					else if(toRegion.getPlayerName().equals(myName) && fromRegion.getArmies() > 1) //do a transfer
-					{
-						attackTransferMoves.add(new AttackTransferMove(myName, fromRegion, toRegion, armies));
-						break;
-					}
-					else
-						possibleToRegions.remove(toRegion);
-				}
+				}	
+				if(!bestMove.equals(null)){
+					//add best move
+					attackTransferMoves.add(bestMove);
+					plannedMap = bestPotMap;
+					plannedMapScore = bestMoveScore;
+				}				
 			}
 		}
 		
@@ -177,6 +198,37 @@ public class NEATWarlightBot implements Bot
 			}
 		}
 		return result;	
+	}
+	
+	public GameMap createPotentialMap(GameMap map, Move move, String playerName){
+		GameMap result = map.getMapCopy();
+		if(move.getClass() == PlaceArmiesMove.class){			//Place armies move
+			PlaceArmiesMove place = (PlaceArmiesMove)move;
+			RegionData r = result.getRegion(place.getRegion().getId());
+			r.setArmies(place.getArmies()+r.getArmies());		//add armies to region
+		} else if(move.getClass() == AttackTransferMove.class){
+			AttackTransferMove att = (AttackTransferMove)move;
+			RegionData from = result.getRegion(att.getFromRegion().getId());
+			RegionData to = result.getRegion(att.getToRegion().getId());
+			if(att.getToRegion().ownedByPlayer(playerName)){
+				//transfer move
+				from.setArmies(from.getArmies()-att.getArmies());		//remove armies from FromRegion
+				to.setArmies(to.getArmies()+att.getArmies());			//add armies to ToRegion
+			} else {
+				//Attack move
+				int[] combatResult = getAverageOutcome(att.getToRegion().getArmies(), att.getArmies());
+				if(combatResult[1]==0){	
+					//Defenders lost
+					to.setArmies(-combatResult[0]);						//add surviving attackers to defending region
+					from.setArmies(from.getArmies()-att.getArmies());	//remove attack armies from origin
+				} else if(combatResult[0]>0){
+					//Defenders won
+					to.setArmies(combatResult[1]);						//Set surviving defenders
+					from.setArmies(from.getArmies()-att.getArmies()+combatResult[0]);	//Return potential survivors
+				}
+			}
+		}
+		return result;
 	}
 	
 	public GameMap createPotentialMap(BotState state, Move move){
