@@ -20,8 +20,10 @@ package com.anji.warlight.conquest.bot;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import org.jgap.Chromosome;
 import org.jgap.Genotype;
 
+import com.anji.integration.Activator;
 import com.anji.warlight.conquest.game.GameMap;
 import com.anji.warlight.conquest.game.RegionData;
 import com.anji.warlight.conquest.game.move.AttackTransferMove;
@@ -34,8 +36,12 @@ public class NEATWarlightBot implements Bot
 {	
 	public float Score;
 	
-	public NEATWarlightBot(Genotype genome){
-		// init netværk from genome
+	private Activator neat;
+	
+	private BotState finalState;
+	
+	public NEATWarlightBot(Activator ac){
+		neat = ac;
 		Score = 0.0f;
 	}
 	
@@ -52,11 +58,18 @@ public class NEATWarlightBot implements Bot
 	@Override
 	public ArrayList<RegionData> getPreferredStartingRegions(BotState state, Long timeOut)
 	{
+		GameMap plannedMap = state.getFullMap().getMapCopy();
 		//Score = neat.getOutput(state.getFullMap.getMapCopy);
 		int m = 6;
 		ArrayList<RegionData> preferredStartingRegions = new ArrayList<RegionData>();
 		for(int i=0; i<m; i++)
 		{
+			
+			/*for(int j = 0; j < plannedMap.regions.size(); j++){
+				//TODO EVERYTHING
+				
+			}
+			*/
 			double rand = Math.random();
 			int r = (int) (rand*state.getPickableStartingRegions().size());
 			int regionId = state.getPickableStartingRegions().get(r).getId();
@@ -71,6 +84,10 @@ public class NEATWarlightBot implements Bot
 		return preferredStartingRegions;
 	}
 	
+	public BotState getFinalState(){
+		return null;
+	}
+	
 	/**
 	 * This method is called for at first part of each round. This example puts two armies on random regions
 	 * until he has no more armies left to place.
@@ -79,6 +96,7 @@ public class NEATWarlightBot implements Bot
 	@Override
 	public ArrayList<PlaceArmiesMove> getPlaceArmiesMoves(BotState state, Long timeOut) 
 	{
+		finalState = state;
 		//Score = neat.getOutput(state.getFullMap.getMapCopy);
 		ArrayList<PlaceArmiesMove> placeArmiesMoves = new ArrayList<PlaceArmiesMove>();
 		String myName = state.getMyPlayerName();
@@ -87,11 +105,12 @@ public class NEATWarlightBot implements Bot
 		LinkedList<RegionData> visibleRegions = state.getMap().getRegions();
 		
 		GameMap plannedMap = state.getFullMap().getMapCopy();
-		float plannedScore = 0.0f; //neat.getOutput(plannedMap)
-		
+		double plannedScore = 0.0; 
+		plannedScore = neat.next(getDoubleArrayMap(plannedMap, state.getMap(), myName))[0];
+		//neat.next();
 		while(armiesLeft > 0)
 		{
-			float bestScore = 0.0f;
+			double bestScore = 0.0;
 			PlaceArmiesMove bestMove = null;
 			GameMap bestMap = null;
 			
@@ -101,7 +120,8 @@ public class NEATWarlightBot implements Bot
 					PlaceArmiesMove potMove = new PlaceArmiesMove(myName, toRegion, Math.min(armiesLeft, armies));
 					//evaluate move
 					GameMap potMap = createPotentialMap(plannedMap, potMove, myName);
-					float potScore = 0.0f; //neat.getoutput(potmap);
+					double potScore = 0.0; //neat.getoutput(potmap);
+					potScore = neat.next(getDoubleArrayMap(potMap, state.getMap(), myName))[0]; //Only one output neuron
 					if(potScore > bestScore){
 						bestMove = potMove;
 						bestScore = potScore;
@@ -127,12 +147,13 @@ public class NEATWarlightBot implements Bot
 	@Override
 	public ArrayList<AttackTransferMove> getAttackTransferMoves(BotState state, Long timeOut) 
 	{
+		finalState = state;
 		//Score = neat.getOutput(state.getFullMap.getMapCopy);
 		ArrayList<AttackTransferMove> attackTransferMoves = new ArrayList<AttackTransferMove>();
 		String myName = state.getMyPlayerName();
 		int armies = 5;
 		GameMap plannedMap = state.getFullMap().getMapCopy();
-		float plannedMapScore = 0.0f; // = NEAT.getOutput(plannelMap);
+		double plannedMapScore = 0.0; // = NEAT.getOutput(plannelMap);
 		
 		for(RegionData fromRegion : state.getMap().getRegions())
 		{
@@ -143,7 +164,7 @@ public class NEATWarlightBot implements Bot
 				
 				// ----- Incredible Stuff -----
 				AttackTransferMove bestMove = null;
-				float bestMoveScore = plannedMapScore;
+				double bestMoveScore = plannedMapScore;
 				GameMap bestPotMap = plannedMap;
 				
 				// generate move from realMap
@@ -155,7 +176,7 @@ public class NEATWarlightBot implements Bot
 					GameMap potMap = createPotentialMap(state, potMove);
 					
 					// evaluate move
-					float potScore = 0.0f; //NEAT.getOutPut(potMap)
+					double potScore = 0.0; //NEAT.getOutPut(potMap)
 					if(potScore > bestMoveScore)
 					{
 						bestMove = potMove;
@@ -181,20 +202,20 @@ public class NEATWarlightBot implements Bot
 	 * @param playerName
 	 * @return
 	 */
-	public float[] getFloatArrayMap(GameMap fullMap, GameMap visibleMap, String playerName){
+	public double[] getDoubleArrayMap(GameMap fullMap, GameMap visibleMap, String playerName){
 		LinkedList<RegionData> full = fullMap.getRegions();
 		LinkedList<RegionData> visible = visibleMap.getRegions();
-		float[] result = new float[full.size()];
+		double[] result = new double[full.size()];
 		//Value is equal to army strength. Positive when owned, negative when enemy or neutral. Same as method below.
 		for(RegionData r : full){
 			if(visible.contains(r)){
 				if(r.ownedByPlayer(playerName)){
 					result[r.getId()] = r.getArmies();			//Owned region
 				} else {
-					result[r.getId()] = -1.0f * r.getArmies(); 	//Enemy or neutral region
+					result[r.getId()] = -1.0 * r.getArmies(); 	//Enemy or neutral region
 				}
 			} else {
-				result[r.getId()] = -2.0f;						//Unknown territory, assumed neutral
+				result[r.getId()] = -2.0;						//Unknown territory, assumed neutral
 			}
 		}
 		return result;	
@@ -219,8 +240,9 @@ public class NEATWarlightBot implements Bot
 				int[] combatResult = getAverageOutcome(att.getToRegion().getArmies(), att.getArmies());
 				if(combatResult[1]==0){	
 					//Defenders lost
-					to.setArmies(-combatResult[0]);						//add surviving attackers to defending region
+					to.setArmies(combatResult[0]);						//add surviving attackers to defending region
 					from.setArmies(from.getArmies()-att.getArmies());	//remove attack armies from origin
+					to.setPlayerName(playerName);
 				} else if(combatResult[0]>0){
 					//Defenders won
 					to.setArmies(combatResult[1]);						//Set surviving defenders
@@ -250,8 +272,9 @@ public class NEATWarlightBot implements Bot
 				int[] combatResult = getAverageOutcome(att.getToRegion().getArmies(), att.getArmies());
 				if(combatResult[1]==0){	
 					//Defenders lost
-					to.setArmies(-combatResult[0]);						//add surviving attackers to defending region
+					to.setArmies(combatResult[0]);						//add surviving attackers to defending region
 					from.setArmies(from.getArmies()-att.getArmies());	//remove attack armies from origin
+					to.setPlayerName(state.getMyPlayerName());
 				} else if(combatResult[0]>0){
 					//Defenders won
 					to.setArmies(combatResult[1]);						//Set surviving defenders
@@ -404,6 +427,13 @@ public class NEATWarlightBot implements Bot
 		result[0] = attackers-da;
 		result[1] = defenders-dd;
 		return result;
+	}
+	
+	public BotState run(){
+		BotParser parser = new BotParser(new NEATWarlightBot());
+		//parser.setLogFile(new File("./BotStarter.log"));
+		parser.run();
+		return finalState;
 	}
 	
 	public static void main(String[] args)
