@@ -16,15 +16,17 @@ import com.anji.util.Properties;
 
 public class WarlightFitnessFunction implements BulkFitnessFunction, Configurable {
 
+	private final static String TRANSCRIBER_CLASS_KEY = "warlightai.transcriber";
 	private ActivatorTranscriber activatorFactory = new ActivatorTranscriber();
-	
 	private NEATWarlightAI bestBot;
 	
 	//ownedRegion (42)
 	
 	@Override
 	public void init(Properties props) throws Exception {
-		activatorFactory.init(props);
+		//activatorFactory.init(props);
+		activatorFactory = (ActivatorTranscriber) props.newObjectProperty( TRANSCRIBER_CLASS_KEY );
+
 		bestBot = null;
 		// TODO Auto-generated method stub
 
@@ -49,6 +51,7 @@ public class WarlightFitnessFunction implements BulkFitnessFunction, Configurabl
 		
 		Arrays.sort(bots);
 		bestBot = bots[bots.length-1];
+		
 		//TODO?????
 	}
 

@@ -69,8 +69,9 @@ public static void main( String[] args ) throws Exception {
 	ArrayList chroms = new ArrayList();
 	for ( int i = 1; i < args.length; ++i ) {
 		Chromosome chrom = db.loadChromosome( args[ i ], config );
-		if ( chrom == null )
+		if ( chrom == null ){
 			throw new IllegalArgumentException( "no chromosome found: " + args[ i ] );
+		}
 		chroms.add( chrom );
 	}
 
