@@ -121,7 +121,7 @@ public class Conquest {
 				config.engine.botCommandTimeoutMillis = 5000; //Long.parseLong(args[1]);
 				
 				config.bot1Init = "internal:com.anji.warlight.conquest.bot.BotStarter"; //args[2];
-				config.bot2Init = "process:java -cp bin com.anji.warlight.conquest.bot.BotStarter";
+				config.bot2Init = "internal:com.anji.warlight.conquest.bot.BotStarter";
 				
 				config.visualize = true;// Boolean.parseBoolean(args[4]);
 				

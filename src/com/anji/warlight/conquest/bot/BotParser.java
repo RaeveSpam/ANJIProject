@@ -73,6 +73,10 @@ public class BotParser extends Thread {
 	
 	public static Bot constructBot(Class botClass) {		
 		Object botObj;
+		if(botClass == NEATWarlightBot.class)
+		{
+			
+		}
 		try {
 			botObj = botClass.getConstructor().newInstance();
 		} catch (Exception e) {
@@ -117,11 +121,13 @@ public class BotParser extends Thread {
 	{
 		log("Bot thread started.");
 		while (true) {
+			System.out.println("... running");
 			String line;
 			log("Reading input...");
 			try {
 				line = input.readLine();
 			} catch (IOException e) {
+				System.out.println("THIS ONE");
 				log("FAILED TO READ NEXT LINE: " + e.getMessage());
 				if (log != null) {
 					log.finish();
@@ -136,6 +142,7 @@ public class BotParser extends Thread {
 				}
 				return;
 			}
+			
 			line = line.trim();
 			if(line.length() == 0) { continue; }
 			log("IN : " + line);

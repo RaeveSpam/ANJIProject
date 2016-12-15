@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.anji.warlight.conquest.bot.*;
 import com.anji.warlight.conquest.engine.Engine.EngineConfig;
 import com.anji.warlight.conquest.engine.Robot.RobotConfig;
 import com.anji.warlight.conquest.engine.replay.FileGameLog;
@@ -240,7 +241,34 @@ public class RunGame
 			throw new RuntimeException("Failed to run/finish the game.", e);
 		}
 	}
-
+	
+	public GameResult go(Bot bot1, Bot bot2)
+	{ 
+		try {
+			GameLog log = null;
+			if (config.replayLog != null) {
+				log = new FileGameLog(config.replayLog);
+			}
+			
+			System.out.println("starting game " + config.gameId);
+			
+			EnginePlayer player1, player2;
+			Robot robot1, robot2;
+			
+			//setup the bots: bot1, bot2
+			robot1 = new InternalRobot(config.playerName1, bot1);
+			robot2 = new InternalRobot(config.playerName1, bot2);
+					
+			player1 = new EnginePlayer(config.playerName1, robot1, config.engine.startingArmies);
+			player2 = new EnginePlayer(config.playerName2, robot2, config.engine.startingArmies);
+						
+			return go(log, player1, player2, robot1, robot2);
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to run/finish the game.", e);
+		}
+	}
+	
+	
 	private GameResult go(GameLog log, EnginePlayer player1, EnginePlayer player2, Robot robot1, Robot robot2) throws InterruptedException {
 		
 		//setup the map

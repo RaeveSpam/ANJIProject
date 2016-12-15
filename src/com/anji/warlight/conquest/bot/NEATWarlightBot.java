@@ -129,7 +129,7 @@ public class NEATWarlightBot implements Bot
 					}
 				}
 			}
-			if(!bestMove.equals(null)){
+			if(bestMove != null){
 				plannedMap = bestMap;
 				plannedScore = bestScore;
 				placeArmiesMoves.add(bestMove);
@@ -183,7 +183,7 @@ public class NEATWarlightBot implements Bot
 						bestMoveScore = potScore;
 					}
 				}	
-				if(!bestMove.equals(null)){
+				if(bestMove != null){
 					//add best move
 					attackTransferMoves.add(bestMove);
 					plannedMap = bestPotMap;
@@ -210,12 +210,12 @@ public class NEATWarlightBot implements Bot
 		for(RegionData r : full){
 			if(visible.contains(r)){
 				if(r.ownedByPlayer(playerName)){
-					result[r.getId()] = r.getArmies();			//Owned region
+					result[r.getId()-1] = r.getArmies();			//Owned region
 				} else {
-					result[r.getId()] = -1.0 * r.getArmies(); 	//Enemy or neutral region
+					result[r.getId()-1] = -1.0 * r.getArmies(); 	//Enemy or neutral region
 				}
 			} else {
-				result[r.getId()] = -2.0;						//Unknown territory, assumed neutral
+				result[r.getId()-1] = -2.0;						//Unknown territory, assumed neutral
 			}
 		}
 		return result;	

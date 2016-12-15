@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
+import com.anji.warlight.conquest.bot.Bot;
 import com.anji.warlight.conquest.bot.BotParser;
 import com.anji.warlight.conquest.engine.Robot;
 import com.anji.warlight.conquest.engine.io.InputOutputStream;
@@ -71,6 +72,18 @@ public class InternalRobot implements Robot {
 		
 		bot = BotParser.runInternal(playerName, botFQCN, botInput.getInputStream(), new PrintStream(botOutput.getOutputStream()), null);
 		System.out.println(playerName + " -> " + botFQCN);
+		
+		robot = new IORobot(playerName, botInput.getOutputStream(), true, botOutput.getInputStream(), null);
+		
+		humanHijack = new HumanRobot(playerName);
+	}
+	
+	public InternalRobot(String playerName, Bot NEATbot) throws IOException {
+		botInput = new InputOutputStream();
+		botOutput = new InputOutputStream();
+		
+		bot = BotParser.runInternal(playerName, NEATbot, botInput.getInputStream(), new PrintStream(botOutput.getOutputStream()), null);
+		System.out.println(playerName + " -> " + NEATbot.toString());
 		
 		robot = new IORobot(playerName, botInput.getOutputStream(), true, botOutput.getInputStream(), null);
 		

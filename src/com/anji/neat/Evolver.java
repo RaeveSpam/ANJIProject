@@ -251,7 +251,7 @@ public static void main( String[] args ) throws Throwable {
 		}*/
 
 		//Properties props = new Properties( args[ 0 ] );
-		Properties props = new Properties( "xor.properties" );
+		Properties props = new Properties( "warlightai.properties" );
 		Evolver evolver = new Evolver();
 		evolver.init( props );
 		evolver.run();
