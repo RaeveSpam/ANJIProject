@@ -45,15 +45,20 @@ public class WarlightFitnessFunction implements BulkFitnessFunction, Configurabl
 				try{
 				NEATWarlightAI bot = new NEATWarlightAI(activatorFactory.newActivator((Chromosome)subjects.get(i)));
 				bot.runGame(false);
+				
 				bots[i] = bot;
 				writer.println(i + ": Score " + bot.score);			
 				((Chromosome)subjects.get(i)).setFitnessValue(bot.score.intValue());
 				
 				} catch(Exception e) {
-					System.out.println(subjects.get(i).toString() + " | " + e.getMessage());
+					System.out.println("!!!!!!!!!!!!!! " + subjects.get(i).toString() + " | " + e.getMessage());
+					
+					System.exit(0);
 				}
 			}
-			
+			for(int i = 0; i < bots.length; i++){
+				System.out.println(bots[i].toString() + " " + bots[i].score);
+			}
 			Arrays.sort(bots);
 			bestBot = bots[bots.length-1];
 			writer.println();	
@@ -68,7 +73,8 @@ public class WarlightFitnessFunction implements BulkFitnessFunction, Configurabl
 
 	@Override
 	public int getMaxFitnessValue() {
-		return 42; // amount of regions 
+		return 42+24; // amount of region + max continentBonus
+		//return 42; // amount of regions 
 	/*	if(bestBot == null){
 			return 0;
 		} else {

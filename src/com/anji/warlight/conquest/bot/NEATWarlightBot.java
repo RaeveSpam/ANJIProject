@@ -24,6 +24,7 @@ import org.jgap.Chromosome;
 import org.jgap.Genotype;
 
 import com.anji.integration.Activator;
+import com.anji.warlight.conquest.game.ContinentData;
 import com.anji.warlight.conquest.game.GameMap;
 import com.anji.warlight.conquest.game.RegionData;
 import com.anji.warlight.conquest.game.move.AttackTransferMove;
@@ -146,6 +147,19 @@ public class NEATWarlightBot implements Bot
 		return placeArmiesMoves;
 	}
 
+	public int getContinentScore(){
+		int result = 0;
+		if(finalState != null){
+			for(ContinentData c : finalState.getMap().getContinents()){
+				System.out.println(c.ownedByPlayer() + " == " + finalState.getMyPlayerName());
+				if(c.ownedByPlayer() == finalState.getMyPlayerName()){
+					result += c.getArmiesReward();
+				} 
+			}
+		}
+		return result;
+	}
+	
 	/**
 	 * This method is called for at the second part of each round. This example attacks if a region has
 	 * more than 6 armies on it, and transfers if it has less than 6 and a neighboring owned region.

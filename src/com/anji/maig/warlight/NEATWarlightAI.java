@@ -67,7 +67,7 @@ public class NEATWarlightAI implements Comparable<NEATWarlightAI> {
 		Config config = new Config();
 		
 		config.engine.maxGameRounds = 100; //Integer.parseInt(args[0]);
-		config.engine.botCommandTimeoutMillis = 5000; //Long.parseLong(args[1]);
+		config.engine.botCommandTimeoutMillis = 2000; //Long.parseLong(args[1]);
 		
 		config.bot1Init = "internal:com.anji.warlight.conquest.bot.NEATWarlightBot"; //args[2];
 		config.bot2Init = "internal:com.anji.warlight.conquest.bot.BotStarter";
@@ -77,17 +77,21 @@ public class NEATWarlightAI implements Comparable<NEATWarlightAI> {
 //			if (args.length == 6) {
 		//config.replayLog = new File("replay.log");
 //		}
-			
+		
 		RunGame run = new RunGame(config);
+		
 		GameResult result = run.go(bot, new BotStarter()); //Bot1 & Boit2
+	
 		if(result == null){
 			score = 0.0;
 		} else {
-			score = (double)result.player1Regions;
+			score = (double)result.player1Regions + (double)bot.getContinentScore();
+			
 		}
 		//BotState state = bot.run();
 		//Score = (double)ScoreState(state);
 		System.out.println("    Score: " + score);
+	
 	}
 
 	private int ScoreState(BotState state){
