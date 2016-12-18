@@ -42,6 +42,7 @@ public class NEATWarlightBot implements Bot
 	
 	public NEATWarlightBot(Activator ac){
 		neat = ac;
+		
 		Score = 0.0f;
 	}
 	
@@ -58,7 +59,7 @@ public class NEATWarlightBot implements Bot
 	@Override
 	public ArrayList<RegionData> getPreferredStartingRegions(BotState state, Long timeOut)
 	{
-		GameMap plannedMap = state.getFullMap().getMapCopy();
+		//GameMap plannedMap = state.getMap().getMapCopy();
 		//Score = neat.getOutput(state.getFullMap.getMapCopy);
 		int m = 6;
 		ArrayList<RegionData> preferredStartingRegions = new ArrayList<RegionData>();
@@ -100,28 +101,34 @@ public class NEATWarlightBot implements Bot
 		//Score = neat.getOutput(state.getFullMap.getMapCopy);
 		ArrayList<PlaceArmiesMove> placeArmiesMoves = new ArrayList<PlaceArmiesMove>();
 		String myName = state.getMyPlayerName();
+		
 		int armies = 1;
 		int armiesLeft = state.getStartingArmies();
-		LinkedList<RegionData> visibleRegions = state.getMap().getRegions();
 		
-		GameMap plannedMap = state.getFullMap().getMapCopy();
-		double plannedScore = 0.0; 
-		plannedScore = neat.next(getDoubleArrayMap(plannedMap, state.getMap(), myName))[0];
-		//neat.next();
+		LinkedList<RegionData> visibleRegions = state.getMap().getRegions();
+		//System.out.println("visibleRegions " + visibleRegions.size());
+		GameMap plannedMap = state.getMap().getMapCopy();
+		double plannedScore = Double.NEGATIVE_INFINITY;
+		
+		//plannedScore = neat.next(getWeightedArrayMap(state.getMap(), myName))[0];
+		//plannedScore = neat.next(getDoubleArrayMap(plannedMap, state.getMap(), myName))[0];
 		while(armiesLeft > 0)
 		{
-			double bestScore = 0.0;
+			double bestScore = Double.NEGATIVE_INFINITY;
 			PlaceArmiesMove bestMove = null;
 			GameMap bestMap = null;
-			
 			for(RegionData toRegion : visibleRegions){
 				if(toRegion.ownedByPlayer(myName)){
+					
 					//create potential move
 					PlaceArmiesMove potMove = new PlaceArmiesMove(myName, toRegion, Math.min(armiesLeft, armies));
 					//evaluate move
-					GameMap potMap = createPotentialMap(plannedMap, potMove, myName);
-					double potScore = 0.0; //neat.getoutput(potmap);
-					potScore = neat.next(getDoubleArrayMap(potMap, state.getMap(), myName))[0]; //Only one output neuron
+					GameMap potMap = createPotentialMap(state, potMove);
+					
+					double potScore = neat.next(getWeightedArrayMap(potMap, myName))[0];
+					
+					//double potScore = neat.next(getDoubleArrayMap(potMap, state.getMap(), myName))[0]; //Only one output neuron
+					//System.out.println(potScore + " > " + bestScore);
 					if(potScore > bestScore){
 						bestMove = potMove;
 						bestScore = potScore;
@@ -131,7 +138,7 @@ public class NEATWarlightBot implements Bot
 			}
 			if(bestMove != null){
 				plannedMap = bestMap;
-				plannedScore = bestScore;
+				//plannedScore = bestScore;
 				placeArmiesMoves.add(bestMove);
 				armiesLeft -= armies;
 			}
@@ -152,49 +159,93 @@ public class NEATWarlightBot implements Bot
 		ArrayList<AttackTransferMove> attackTransferMoves = new ArrayList<AttackTransferMove>();
 		String myName = state.getMyPlayerName();
 		int armies = 5;
-		GameMap plannedMap = state.getFullMap().getMapCopy();
-		double plannedMapScore = 0.0; // = NEAT.getOutput(plannelMap);
-		
+		GameMap plannedMap = state.getMap().getMapCopy();
+		double plannedMapScore = Double.NEGATIVE_INFINITY; //neat.next(getDoubleArrayMap(plannedMap, state.getMap(), myName))[0];
+		//System.out.print("*** Best Score " + plannedMapScore + " | ");
 		for(RegionData fromRegion : state.getMap().getRegions())
 		{
-			if(fromRegion.ownedByPlayer(myName)) //do an attack
+			//System.out.println(myName + " == " + fromRegion.getPlayerName());
+			
+			if(fromRegion.ownedByPlayer(myName)) //do an attack/transfer
 			{
+				//System.out.println("lol 2");
 				ArrayList<RegionData> possibleToRegions = new ArrayList<RegionData>();
 				possibleToRegions.addAll(fromRegion.getNeighbors());	
 				
 				// ----- Incredible Stuff -----
 				AttackTransferMove bestMove = null;
-				double bestMoveScore = plannedMapScore;
-				GameMap bestPotMap = plannedMap;
 				
+				GameMap bestPotMap = plannedMap;
+				double bestMoveScore = Double.NEGATIVE_INFINITY;
 				// generate move from realMap
 				for(RegionData toRegion : possibleToRegions){
-
+					
 					// generate move from realMap
 					armies = fromRegion.getArmies()-1;
 					AttackTransferMove potMove = new AttackTransferMove(myName, fromRegion, toRegion, armies);
 					GameMap potMap = createPotentialMap(state, potMove);
 					
 					// evaluate move
-					double potScore = 0.0; //NEAT.getOutPut(potMap)
+					double potScore = neat.next(getWeightedArrayMap(potMap, myName))[0];
+					//double potScore = neat.next(getDoubleArrayMap(potMap, state.getMap(), myName))[0];
+					
+					//System.out.print(potScore + " | ");
+					//System.out.println(potScore + " > " + bestMoveScore);
 					if(potScore > bestMoveScore)
 					{
 						bestMove = potMove;
 						bestMoveScore = potScore;
 					}
-				}	
+				}
+				//System.out.println("");
 				if(bestMove != null){
 					//add best move
 					attackTransferMoves.add(bestMove);
 					plannedMap = bestPotMap;
-					plannedMapScore = bestMoveScore;
-				}				
+					
+				}		
 			}
 		}
-		
+		//System.out.println(attackTransferMoves.size() + " attackTransferMoves");
 		return attackTransferMoves;
 	}
 
+	public double[] getWeightedArrayMap(GameMap map, String playerName){
+		//System.out.println(playerName);
+		LinkedList<RegionData> regions = map.getRegions();
+		double[] result = new double[regions.size()];
+		for(int i = 0; i < regions.size(); i++){
+			RegionData r = regions.get(i);
+			double value = 0;
+			if(r.ownedByPlayer("neutral")){
+				value = -2;
+			} else {
+				String owner = r.getPlayerName();
+				//System.out.print(owner + " ");
+				value = r.getArmies();
+				LinkedList<RegionData> neighbours = r.getNeighbors();
+				for(RegionData n : neighbours){
+					if(n.ownedByPlayer(owner)){
+						value += n.getArmies();
+					} else if(n.ownedByPlayer("neutral")){
+						// do nothing
+					} else {
+						value -= n.getArmies();
+					}
+				}
+				if(!r.ownedByPlayer(playerName)){
+					value = value*(-1.0);
+				} else {
+
+				}
+			}
+			//System.out.print(value + ", ");
+			result[i] = value;
+		}
+		//System.out.println();
+		return result;
+	}
+	
 	/**
 	 * Get a float[] representation of the given map based on the player's visible map.
 	 * @param fullMap
@@ -205,22 +256,26 @@ public class NEATWarlightBot implements Bot
 	public double[] getDoubleArrayMap(GameMap fullMap, GameMap visibleMap, String playerName){
 		LinkedList<RegionData> full = fullMap.getRegions();
 		LinkedList<RegionData> visible = visibleMap.getRegions();
+		//System.out.println("Visible regions " + visible.size());
+		LinkedList<Integer> visibleIndices = new LinkedList<Integer>();
 		double[] result = new double[full.size()];
 		//Value is equal to army strength. Positive when owned, negative when enemy or neutral. Same as method below.
 		for(RegionData r : full){
-			if(visible.contains(r)){
+			if(true){
+				//System.out.println("visible " + r.getId());
 				if(r.ownedByPlayer(playerName)){
 					result[r.getId()-1] = r.getArmies();			//Owned region
 				} else {
 					result[r.getId()-1] = -1.0 * r.getArmies(); 	//Enemy or neutral region
 				}
 			} else {
+				//System.out.println("not visible");
 				result[r.getId()-1] = -2.0;						//Unknown territory, assumed neutral
 			}
 		}
 		return result;	
 	}
-	
+	/*
 	public GameMap createPotentialMap(GameMap map, Move move, String playerName){
 		GameMap result = map.getMapCopy();
 		if(move.getClass() == PlaceArmiesMove.class){			//Place armies move
@@ -252,9 +307,11 @@ public class NEATWarlightBot implements Bot
 		}
 		return result;
 	}
+	*/
 	
 	public GameMap createPotentialMap(BotState state, Move move){
 		GameMap map = state.getFullMap().getMapCopy();
+		
 		if(move.getClass() == PlaceArmiesMove.class){			//Place armies move
 			PlaceArmiesMove place = (PlaceArmiesMove)move;
 			RegionData r = map.getRegion(place.getRegion().getId());
@@ -284,7 +341,7 @@ public class NEATWarlightBot implements Bot
 		}
 		return map;
 	}
-	
+	/*
 	public float[] createWeightedPotentialState(BotState state, Move move){
 		GameMap map = state.getFullMap().getMapCopy();
 		
@@ -387,10 +444,11 @@ public class NEATWarlightBot implements Bot
 		}	
 		return result;
 	}
-	
+	*/
 	@Override
 	public void setGUI(GUI gui) {
 	}
+	
 	
 	/**
 	 * @param defenders

@@ -153,13 +153,17 @@ public void init( Properties props ) throws Exception {
 	maxFitness = fitnessFunc.getMaxFitnessValue();
 
 	// load population, either from previous run or random
-	genotype = db.loadGenotype( config );
-	if ( genotype != null )
+	genotype = null; //db.loadGenotype( config );
+	if ( genotype != null ){
+		System.out.println("***WRONG***");
 		logger.info( "genotype from previous run" );
+		}
 	else {
+		System.out.println("***RANDOM***");
 		genotype = Genotype.randomInitialGenotype( config );
 		logger.info( "random genotype" );
 	}
+	System.out.println("Genotype: " + genotype.toString());
 
 }
 

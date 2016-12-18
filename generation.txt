@@ -1,0 +1,12 @@
+0: Score 11.0
+1: Score 2.0
+2: Score 16.0
+3: Score 6.0
+4: Score 8.0
+5: Score 2.0
+6: Score 6.0
+7: Score 4.0
+8: Score 3.0
+9: Score 4.0
+
+Best Score 16.0

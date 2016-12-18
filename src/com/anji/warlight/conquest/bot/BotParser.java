@@ -121,7 +121,6 @@ public class BotParser extends Thread {
 	{
 		log("Bot thread started.");
 		while (true) {
-			System.out.println("... running");
 			String line;
 			log("Reading input...");
 			try {

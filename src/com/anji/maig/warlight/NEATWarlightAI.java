@@ -52,13 +52,16 @@ public class NEATWarlightAI implements Comparable<NEATWarlightAI> {
 		config.visualize = false;// Boolean.parseBoolean(args[4]);
 		
 //			if (args.length == 6) {
-			config.replayLog = new File("replay.log");
+		//config.replayLog = new File("replay.log");
 //		}
 			
 		RunGame run = new RunGame(config);
 		GameResult result = run.go(bot, new BotStarter()); //Bot1 & Boit2
-		Score = (double)result.player1Regions;
-		
+		if(result == null){
+			Score = 0.0;
+		} else {
+			Score = (double)result.player1Regions;
+		}
 		//BotState state = bot.run();
 		//Score = (double)ScoreState(state);
 		System.out.println("    Score: " + Score);

@@ -41,26 +41,26 @@ public class WarlightFitnessFunction implements BulkFitnessFunction, Configurabl
 		double bestScore = 0;
 		try{
 			PrintWriter writer = new PrintWriter("generation.txt", "UTF-8");
-		for(int i = 0; i < subjects.size(); i++){
-			try{
-			NEATWarlightAI bot = new NEATWarlightAI(activatorFactory.newActivator((Chromosome)subjects.get(i)));
-			bot.runGame();
-			bots[i] = bot;
-			writer.println(i + ": Score " + bot.Score);			
-			((Chromosome)subjects.get(i)).setFitnessValue(bot.Score.intValue());
-			
-			} catch(Exception e) {
-				System.out.println(subjects.get(i).toString() + " | " + e.getMessage());
+			for(int i = 0; i < subjects.size(); i++){
+				try{
+				NEATWarlightAI bot = new NEATWarlightAI(activatorFactory.newActivator((Chromosome)subjects.get(i)));
+				bot.runGame();
+				bots[i] = bot;
+				writer.println(i + ": Score " + bot.Score);			
+				((Chromosome)subjects.get(i)).setFitnessValue(bot.Score.intValue());
+				
+				} catch(Exception e) {
+					System.out.println(subjects.get(i).toString() + " | " + e.getMessage());
+				}
 			}
-		}
-		
-		Arrays.sort(bots);
-		bestBot = bots[bots.length-1];
-		writer.println();	
-		writer.println("Best Score " + bestBot.Score);
+			
+			Arrays.sort(bots);
+			bestBot = bots[bots.length-1];
+			writer.println();	
+			writer.println("Best Score " + bestBot.Score);
 			writer.close();
 		} catch (IOException e){
-			
+			System.out.println("IOException | " + e.getMessage());
 		}
 		
 		//TODO?????
@@ -68,10 +68,11 @@ public class WarlightFitnessFunction implements BulkFitnessFunction, Configurabl
 
 	@Override
 	public int getMaxFitnessValue() {
-		if(bestBot == null){
+		return 42;
+	/*	if(bestBot == null){
 			return 0;
 		} else {
 			return bestBot.Score.intValue();
-		}
+		} */
 	}
 }
