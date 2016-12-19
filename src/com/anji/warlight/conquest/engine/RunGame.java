@@ -189,9 +189,9 @@ public class RunGame
 	
 	public RunGame(Config config)
 	{
-		System.out.println("LÅLÅLÅLÅLÅ");
+		
 		this.config = config;	
-		System.out.println("LÅLÅLÅLÅLÅ");
+		
 	}
 	
 	public GameResult goReplay(File replayFile) {

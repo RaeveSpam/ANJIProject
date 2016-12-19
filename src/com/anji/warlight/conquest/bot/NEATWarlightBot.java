@@ -151,10 +151,13 @@ public class NEATWarlightBot implements Bot
 		int result = 0;
 		if(finalState != null){
 			for(ContinentData c : finalState.getMap().getContinents()){
-				System.out.println(c.ownedByPlayer() + " == " + finalState.getMyPlayerName());
-				if(c.ownedByPlayer() == finalState.getMyPlayerName()){
-					result += c.getArmiesReward();
-				} 
+				//System.out.println(c.ownedByPlayer() + " == " + finalState.getMyPlayerName());
+				if(c.ownedByPlayer() != null){
+					if(c.ownedByPlayer().equals(finalState.getMyPlayerName())){
+						//System.out.println("Continent");
+						result += c.getArmiesReward();
+					}
+				}
 			}
 		}
 		return result;

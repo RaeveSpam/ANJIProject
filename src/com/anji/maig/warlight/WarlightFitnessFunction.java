@@ -56,9 +56,6 @@ public class WarlightFitnessFunction implements BulkFitnessFunction, Configurabl
 					System.exit(0);
 				}
 			}
-			for(int i = 0; i < bots.length; i++){
-				System.out.println(bots[i].toString() + " " + bots[i].score);
-			}
 			Arrays.sort(bots);
 			bestBot = bots[bots.length-1];
 			writer.println();	
