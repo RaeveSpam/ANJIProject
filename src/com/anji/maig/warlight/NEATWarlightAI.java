@@ -26,7 +26,8 @@ public class NEATWarlightAI implements Comparable<NEATWarlightAI> {
 	Properties properties;
 	private final static String TRANSCRIBER_CLASS_KEY = "warlightai.transcriber";
 	private final static String CHROMOSOME_ID_KEY = "warlightai.chromosome.id";
-	
+	public GameResult result;
+
 
 	public Double score;
 	
@@ -79,8 +80,8 @@ public class NEATWarlightAI implements Comparable<NEATWarlightAI> {
 //		}
 		
 		RunGame run = new RunGame(config);
-		
-		GameResult result = run.go(bot, new BotStarter()); //Bot1 & Boit2
+		result = run.go(bot, new BotStarter()); //Bot1 & Bot2
+
 	
 		if(result == null){
 			score = 0.0;
